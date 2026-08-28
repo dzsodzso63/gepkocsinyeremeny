@@ -7,11 +7,11 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      '/otp-check': {
+      '/api/otp-check': {
         target: 'https://www.otpbank.hu',
         changeOrigin: true,
         secure: true,
-        rewrite: (path) => path.replace(/^\/otp-check/, '/apps/composite/api/carsweepstakes/check'),
+        rewrite: (path) => path.replace(/^\/api\/otp-check/, '/apps/composite/api/carsweepstakes/check'),
       },
     },
   },

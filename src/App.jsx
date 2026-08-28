@@ -5,9 +5,7 @@ const STORAGE_KEY = 'car-sweepstakes-tickets-v1'
 const DEFAULT_TICKETS = [
   { id: 'demo-1', number: '550467611', label: 'Példa szám', status: 'idle' },
 ]
-const OTP_CHECK_API = import.meta.env.DEV
-  ? '/otp-check'
-  : 'https://www.otpbank.hu/apps/composite/api/carsweepstakes/check'
+const OTP_CHECK_API = '/api/otp-check'
 
 const emptyDraft = { id: null, label: '', number: '' }
 
