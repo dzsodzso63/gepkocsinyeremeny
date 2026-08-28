@@ -5,6 +5,9 @@ const STORAGE_KEY = 'car-sweepstakes-tickets-v1'
 const DEFAULT_TICKETS = [
   { id: 'demo-1', number: '550467611', label: 'Példa szám', status: 'idle' },
 ]
+const OTP_CHECK_API = import.meta.env.DEV
+  ? '/otp-check'
+  : 'https://www.otpbank.hu/apps/composite/api/carsweepstakes/check'
 
 const emptyDraft = { id: null, label: '', number: '' }
 
@@ -103,7 +106,7 @@ function App() {
   }
 
   const checkTicket = async (ticket) => {
-    const response = await fetch(`/otp-check/${encodeURIComponent(ticket.number)}`)
+    const response = await fetch(`${OTP_CHECK_API}/${encodeURIComponent(ticket.number)}`)
 
     if (!response.ok) {
       throw new Error(`A szerver hibát jelzett (${response.status}).`)
