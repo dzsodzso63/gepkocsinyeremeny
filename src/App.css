@@ -1,0 +1,266 @@
+.app-shell {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 40px 20px 64px;
+}
+
+.panel {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 20px;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.06);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.panel-header,
+.list-header,
+.ticket-main,
+.ticket-actions,
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #1d4ed8;
+}
+
+h1,
+h2 {
+  margin: 0;
+  color: #111827;
+}
+
+h1 {
+  font-size: clamp(2rem, 3vw, 2.8rem);
+}
+
+h2 {
+  font-size: 1.4rem;
+}
+
+.primary-button,
+.secondary-button,
+.ghost-button,
+.tiny-button {
+  border: none;
+  border-radius: 12px;
+  padding: 0.8rem 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.primary-button:hover,
+.secondary-button:hover,
+.ghost-button:hover,
+.tiny-button:hover {
+  transform: translateY(-1px);
+}
+
+.primary-button {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: white;
+}
+
+.secondary-button {
+  background: #e0ecff;
+  color: #1d4ed8;
+}
+
+.ghost-button {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.ticket-form {
+  margin-top: 24px;
+  display: grid;
+  grid-template-columns: minmax(180px, 1.2fr) minmax(200px, 1.4fr) auto;
+  gap: 16px;
+  align-items: end;
+}
+
+.ticket-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.ticket-form input {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  font-size: 1rem;
+  color: #111827;
+  background: #f9fafb;
+  box-sizing: border-box;
+}
+
+.ticket-form input:focus {
+  outline: 3px solid rgba(37, 99, 235, 0.18);
+  border-color: #60a5fa;
+}
+
+.error-message {
+  margin: 16px 0 0;
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.list-panel {
+  padding-top: 18px;
+}
+
+.empty-state {
+  padding: 28px 8px 12px;
+  color: #6b7280;
+  text-align: center;
+}
+
+.ticket-list {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ticket-item {
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 16px;
+  background: #f8fafc;
+}
+
+.ticket-main {
+  align-items: flex-start;
+}
+
+.ticket-main strong {
+  display: block;
+  color: #111827;
+  margin-bottom: 6px;
+}
+
+.ticket-main p,
+.ticket-meta {
+  margin: 0;
+  color: #4b5563;
+}
+
+.ticket-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  font-size: 0.82rem;
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 120px;
+  padding: 0.55rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.status.idle {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.status.won {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status.lost {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.status.error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.status.checking {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.ticket-actions {
+  margin-top: 16px;
+  justify-content: flex-end;
+}
+
+.tiny-button {
+  padding: 0.6rem 0.8rem;
+  font-size: 0.8rem;
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.tiny-button.secondary {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.tiny-button.danger {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+@media (max-width: 720px) {
+  .panel-header,
+  .list-header,
+  .ticket-main,
+  .ticket-actions,
+  .actions,
+  .ticket-meta {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ticket-form {
+    grid-template-columns: 1fr;
+  }
+
+  .primary-button,
+  .secondary-button,
+  .ghost-button,
+  .tiny-button {
+    width: 100%;
+  }
+
+  .status {
+    min-width: 0;
+    width: 100%;
+  }
+}
