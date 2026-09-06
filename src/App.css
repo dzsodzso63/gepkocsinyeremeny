@@ -50,7 +50,8 @@ h2 {
 .primary-button,
 .secondary-button,
 .ghost-button,
-.tiny-button {
+.tiny-button,
+.icon-button {
   border: none;
   border-radius: 12px;
   padding: 0.8rem 1.2rem;
@@ -62,7 +63,8 @@ h2 {
 .primary-button:hover,
 .secondary-button:hover,
 .ghost-button:hover,
-.tiny-button:hover {
+.tiny-button:hover,
+.icon-button:hover {
   transform: translateY(-1px);
 }
 
@@ -114,6 +116,102 @@ button:disabled {
 }
 
 .ticket-form input:focus {
+  outline: 3px solid rgba(37, 99, 235, 0.18);
+  border-color: #60a5fa;
+}
+
+.import-export-row {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.mini-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: auto;
+}
+
+.mini-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.mini-pill.winner {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.mini-pill.plain {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.mini-pill.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.mini-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #16a34a;
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  background: #e0ecff;
+  color: #1d4ed8;
+  font-size: 1.25rem;
+}
+
+.import-box {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.import-box label {
+  font-weight: 600;
+  color: #374151;
+}
+
+.import-box textarea {
+  width: 100%;
+  min-height: 150px;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  font-size: 0.95rem;
+  resize: vertical;
+  background: #f9fafb;
+  color: #111827;
+  box-sizing: border-box;
+}
+
+.import-box textarea:focus {
   outline: 3px solid rgba(37, 99, 235, 0.18);
   border-color: #60a5fa;
 }
@@ -255,8 +353,13 @@ button:disabled {
   .primary-button,
   .secondary-button,
   .ghost-button,
-  .tiny-button {
+  .tiny-button,
+  .icon-button {
     width: 100%;
+  }
+
+  .import-export-row {
+    justify-content: stretch;
   }
 
   .status {

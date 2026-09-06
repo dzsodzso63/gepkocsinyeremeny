@@ -1,19 +1,26 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './App.css'
+import { downloadTicketsAsJson, parseImportedTickets, type Ticket } from './ticketImportExport'
 
 const STORAGE_KEY = 'car-sweepstakes-tickets-v1'
-const DEFAULT_TICKETS = [
-  { id: 'demo-1', number: '550467611', label: 'Példa szám', status: 'idle' },
+const DEFAULT_TICKETS: Ticket[] = [
+  { id: 'demo-1', number: '550467611', label: 'Példa szám', status: 'idle', lastChecked: null, result: null },
 ]
 const OTP_CHECK_API = '/api/otp-check'
 
-const emptyDraft = { id: null, label: '', number: '' }
+type Draft = {
+  id: string | null
+  label: string
+  number: string
+}
 
-function normalizeNumber(value) {
+const emptyDraft: Draft = { id: null, label: '', number: '' }
+
+function normalizeNumber(value: string | number | null | undefined): string {
   return String(value ?? '').replace(/\D/g, '').slice(0, 12)
 }
 
-function formatStatus(status) {
+function formatStatus(status?: Ticket['status']) {
   switch (status) {
     case 'won':
       return 'Nyert'
@@ -28,8 +35,28 @@ function formatStatus(status) {
   }
 }
 
+function isSameWeek(dateValue: string, baseDate = new Date()) {
+  const date = new Date(dateValue)
+  if (Number.isNaN(date.getTime())) {
+    return false
+  }
+
+  const base = new Date(baseDate)
+  const monday = new Date(base)
+  const day = monday.getDay()
+  const diffToMonday = day === 0 ? -6 : 1 - day
+  monday.setHours(0, 0, 0, 0)
+  monday.setDate(monday.getDate() + diffToMonday)
+
+  const weekStart = new Date(monday)
+  const weekEnd = new Date(monday)
+  weekEnd.setDate(weekEnd.getDate() + 7)
+
+  return date >= weekStart && date < weekEnd
+}
+
 function App() {
-  const [tickets, setTickets] = useState(() => {
+  const [tickets, setTickets] = useState<Ticket[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEY)
 
     if (!saved) {
@@ -43,22 +70,25 @@ function App() {
       return DEFAULT_TICKETS
     }
   })
-  const [draft, setDraft] = useState(emptyDraft)
+  const [draft, setDraft] = useState<Draft>(emptyDraft)
   const [error, setError] = useState('')
   const [checkingAll, setCheckingAll] = useState(false)
+  const [importText, setImportText] = useState('')
+  const [isImportOpen, setIsImportOpen] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(tickets))
   }, [tickets])
 
-  const handleDraftChange = (field, value) => {
+  const handleDraftChange = (field: keyof Draft, value: string) => {
     setDraft((previous) => ({
       ...previous,
       [field]: value,
     }))
   }
 
-  const handleSubmit = (event) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
     const number = normalizeNumber(draft.number)
@@ -67,7 +97,7 @@ function App() {
       return
     }
 
-    const nextTicket = {
+    const nextTicket: Ticket = {
       id: draft.id ?? crypto.randomUUID(),
       number,
       label: draft.label.trim() || 'Névtelen',
@@ -90,11 +120,11 @@ function App() {
     setError('')
   }
 
-  const handleDelete = (id) => {
+  const handleDelete = (id: string) => {
     setTickets((previous) => previous.filter((ticket) => ticket.id !== id))
   }
 
-  const handleEdit = (ticket) => {
+  const handleEdit = (ticket: Ticket) => {
     setDraft({
       id: ticket.id,
       label: ticket.label,
@@ -103,15 +133,15 @@ function App() {
     setError('')
   }
 
-  const checkTicket = async (ticket) => {
+  const checkTicket = async (ticket: Ticket): Promise<Ticket> => {
     const response = await fetch(`${OTP_CHECK_API}/${encodeURIComponent(ticket.number)}`)
 
     if (!response.ok) {
       throw new Error(`A szerver hibát jelzett (${response.status}).`)
     }
 
-    const payload = await response.json()
-    const won = Array.isArray(payload?.sweepstakes) && payload.sweepstakes.length > 0
+    const payload = (await response.json()) as Record<string, unknown> & { sweepstakes?: unknown[] }
+    const won = Array.isArray(payload.sweepstakes) && payload.sweepstakes.length > 0
 
     return {
       ...ticket,
@@ -130,11 +160,11 @@ function App() {
     setCheckingAll(true)
     setError('')
 
-    const checkedById = new Map()
+    const checkedById = new Map<string, Ticket>()
 
     for (const ticket of tickets) {
       try {
-        const updatedTicket = {
+        const updatedTicket: Ticket = {
           ...ticket,
           status: 'checking',
         }
@@ -143,11 +173,12 @@ function App() {
         const result = await checkTicket(ticket)
         checkedById.set(ticket.id, result)
       } catch (err) {
+        const message = err instanceof Error ? err.message : 'Ismeretlen hiba.'
         checkedById.set(ticket.id, {
           ...ticket,
           status: 'error',
           lastChecked: new Date().toISOString(),
-          result: { error: err.message },
+          result: { error: message },
         })
       }
     }
@@ -158,7 +189,7 @@ function App() {
     setCheckingAll(false)
   }
 
-  const handleCheckSingle = async (ticket) => {
+  const handleCheckSingle = async (ticket: Ticket) => {
     setError('')
 
     try {
@@ -167,16 +198,77 @@ function App() {
         previous.map((item) => (item.id === ticket.id ? updatedTicker : item)),
       )
     } catch (err) {
-      const failedTicket = {
+      const message = err instanceof Error ? err.message : 'Ismeretlen hiba.'
+      const failedTicket: Ticket = {
         ...ticket,
         status: 'error',
         lastChecked: new Date().toISOString(),
-        result: { error: err.message },
+        result: { error: message },
       }
       setTickets((previous) =>
         previous.map((item) => (item.id === ticket.id ? failedTicket : item)),
       )
-      setError(err.message)
+      setError(message)
+    }
+  }
+
+  const handleExport = () => {
+    downloadTicketsAsJson(tickets)
+    setError('')
+  }
+
+  const handleImportText = () => {
+    const { tickets: importedTickets, error: importError } = parseImportedTickets(importText)
+
+    if (importError) {
+      setError(importError)
+      return
+    }
+
+    setTickets((previous) => {
+      const deduplicated = importedTickets.filter(
+        (ticket) => !previous.some((existing) => existing.number === ticket.number),
+      )
+
+      return [...deduplicated, ...previous]
+    })
+    setImportText('')
+    setIsImportOpen(false)
+    setError('')
+  }
+
+  const hasWinnerInList = tickets.some((ticket) => ticket.status === 'won')
+  const allCheckedThisWeek =
+    tickets.length > 0 && tickets.every((ticket) => ticket.lastChecked && isSameWeek(ticket.lastChecked))
+
+  const handleImportFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) {
+      return
+    }
+
+    try {
+      const text = await file.text()
+      const { tickets: importedTickets, error: importError } = parseImportedTickets(text)
+
+      if (importError) {
+        setError(importError)
+        return
+      }
+
+      setTickets((previous) => {
+        const deduplicated = importedTickets.filter(
+          (ticket) => !previous.some((existing) => existing.number === ticket.number),
+        )
+
+        return [...deduplicated, ...previous]
+      })
+      setError('')
+    } catch (err) {
+      console.error(err)
+      setError('A fájl beolvasása sikertelen.')
+    } finally {
+      event.target.value = ''
     }
   }
 
@@ -186,7 +278,7 @@ function App() {
         <div className="panel-header">
           <div>
             <p className="eyebrow">OTP nyeremény ellenőrzés</p>
-            <h1>Gépkocsi nyeremény betétkönyv számok</h1>
+            <h1>OTP Gépkocsinyeremény-betét számok</h1>
           </div>
           <button type="button" className="primary-button" onClick={handleCheckAll} disabled={checkingAll}>
             {checkingAll ? 'Ellenőrzés...' : 'Mindet ellenőrizze'}
@@ -227,6 +319,46 @@ function App() {
           </div>
         </form>
 
+        <div className="import-export-row">
+          <div className="mini-summary" aria-live="polite">
+            <span className={`mini-pill ${hasWinnerInList ? 'winner' : allCheckedThisWeek ? 'plain' : 'pending'}`}>
+              {hasWinnerInList ? 'Van nyertes' : allCheckedThisWeek ? 'Nincs nyertes' : 'Ellenőrzésre vár'}
+            </span>
+            {allCheckedThisWeek && <span className="mini-check" title="Minden szám ellenőrizve ezen a héten">✓</span>}
+          </div>
+
+          <button type="button" className="icon-button import-button" onClick={() => setIsImportOpen((open) => !open)} aria-label="Importálandó adatok megnyitása" title="Importálandó adatok megnyitása">
+            ⬇️
+          </button>
+          <button type="button" className="icon-button export-button" onClick={handleExport} aria-label="Exportálás JSON fájlba" title="Exportálás JSON fájlba">
+            ⬆️
+          </button>
+          <button type="button" className="icon-button" onClick={() => fileInputRef.current?.click()} aria-label="JSON fájl importálása" title="JSON fájl importálása">
+            📁
+          </button>
+          <input ref={fileInputRef} type="file" accept="application/json,.json,.txt" hidden onChange={handleImportFile} />
+        </div>
+
+        {isImportOpen && (
+          <div className="import-box">
+            <label htmlFor="import-text">Import JSON vagy számlista</label>
+            <textarea
+              id="import-text"
+              value={importText}
+              onChange={(event) => setImportText(event.target.value)}
+              placeholder='[
+  {"label": "Autó", "number": "550467611"}
+]
+ vagy
+ 550467611
+ 550467612'
+            />
+            <button type="button" className="secondary-button" onClick={handleImportText}>
+              Importálás
+            </button>
+          </div>
+        )}
+
         {error && <p className="error-message">{error}</p>}
       </section>
 
@@ -258,7 +390,7 @@ function App() {
                       ? `Utolsó ellenőrzés: ${new Date(ticket.lastChecked).toLocaleString('hu-HU')}`
                       : 'Még nem ellenőrizték'}
                   </small>
-                  {ticket.result && ticket.result.sweepstakes && (
+                  {ticket.result && typeof ticket.result === 'object' && 'sweepstakes' in ticket.result && Array.isArray(ticket.result.sweepstakes) && (
                     <small>
                       {ticket.result.sweepstakes.length > 0
                         ? `${ticket.result.sweepstakes.length} nyerési elem`
