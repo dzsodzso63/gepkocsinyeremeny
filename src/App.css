@@ -40,7 +40,7 @@ h2 {
 }
 
 h1 {
-  font-size: clamp(2rem, 3vw, 2.8rem);
+  font-size: clamp(2rem, 3vw, 2rem);
 }
 
 h2 {
@@ -51,7 +51,8 @@ h2 {
 .secondary-button,
 .ghost-button,
 .tiny-button,
-.icon-button {
+.icon-button,
+.toggle-form-button {
   border: none;
   border-radius: 12px;
   padding: 0.8rem 1.2rem;
@@ -64,7 +65,8 @@ h2 {
 .secondary-button:hover,
 .ghost-button:hover,
 .tiny-button:hover,
-.icon-button:hover {
+.icon-button:hover,
+.toggle-form-button:hover {
   transform: translateY(-1px);
 }
 
@@ -86,6 +88,34 @@ h2 {
 button:disabled {
   opacity: 0.65;
   cursor: not-allowed;
+}
+
+.toolbar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.action-buttons-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toggle-form-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 12px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-size: 1.7rem;
+  line-height: 1;
 }
 
 .ticket-form {
@@ -120,19 +150,10 @@ button:disabled {
   border-color: #60a5fa;
 }
 
-.import-export-row {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 8px;
-  margin-top: 18px;
-}
-
 .mini-summary {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-right: auto;
 }
 
 .mini-pill {
@@ -336,6 +357,11 @@ button:disabled {
 }
 
 @media (max-width: 720px) {
+
+  h1 {
+    font-size: clamp(1.0rem, 4vw, 2.4rem);
+  }
+
   .panel-header,
   .list-header,
   .ticket-main,
@@ -354,12 +380,28 @@ button:disabled {
   .secondary-button,
   .ghost-button,
   .tiny-button,
-  .icon-button {
+  .icon-button,
+  .toggle-form-button {
     width: 100%;
   }
 
-  .import-export-row {
-    justify-content: stretch;
+  .toolbar-row {
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .action-buttons-group {
+    width: 100%;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+  }
+
+  .toggle-form-button,
+  .icon-button {
+    flex: 1 1 0;
+    min-width: 0;
+    width: auto;
   }
 
   .status {

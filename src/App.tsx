@@ -75,6 +75,7 @@ function App() {
   const [checkingAll, setCheckingAll] = useState(false)
   const [importText, setImportText] = useState('')
   const [isImportOpen, setIsImportOpen] = useState(false)
+  const [isFormOpen, setIsFormOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   useEffect(() => {
@@ -117,6 +118,7 @@ function App() {
     })
 
     setDraft(emptyDraft)
+    setIsFormOpen(false)
     setError('')
   }
 
@@ -130,6 +132,7 @@ function App() {
       label: ticket.label,
       number: ticket.number,
     })
+    setIsFormOpen(true)
     setError('')
   }
 
@@ -285,41 +288,7 @@ function App() {
           </button>
         </div>
 
-        <form className="ticket-form" onSubmit={handleSubmit}>
-          <label>
-            <span>Címke</span>
-            <input
-              type="text"
-              value={draft.label}
-              onChange={(event) => handleDraftChange('label', event.target.value)}
-              placeholder="Pl. autó, gyűjtés, ..."
-            />
-          </label>
-
-          <label>
-            <span>Betétkönyv szám</span>
-            <input
-              type="text"
-              inputMode="numeric"
-              value={draft.number}
-              onChange={(event) => handleDraftChange('number', normalizeNumber(event.target.value))}
-              placeholder="550467611"
-            />
-          </label>
-
-          <div className="actions">
-            <button type="submit" className="secondary-button">
-              {draft.id ? 'Mentés' : 'Szám hozzáadása'}
-            </button>
-            {draft.id && (
-              <button type="button" className="ghost-button" onClick={() => setDraft(emptyDraft)}>
-                Mégse
-              </button>
-            )}
-          </div>
-        </form>
-
-        <div className="import-export-row">
+        <div className="toolbar-row">
           <div className="mini-summary" aria-live="polite">
             <span className={`mini-pill ${hasWinnerInList ? 'winner' : allCheckedThisWeek ? 'plain' : 'pending'}`}>
               {hasWinnerInList ? 'Van nyertes' : allCheckedThisWeek ? 'Nincs nyertes' : 'Ellenőrzésre vár'}
@@ -327,17 +296,77 @@ function App() {
             {allCheckedThisWeek && <span className="mini-check" title="Minden szám ellenőrizve ezen a héten">✓</span>}
           </div>
 
-          <button type="button" className="icon-button import-button" onClick={() => setIsImportOpen((open) => !open)} aria-label="Importálandó adatok megnyitása" title="Importálandó adatok megnyitása">
-            ⬇️
-          </button>
-          <button type="button" className="icon-button export-button" onClick={handleExport} aria-label="Exportálás JSON fájlba" title="Exportálás JSON fájlba">
-            ⬆️
-          </button>
-          <button type="button" className="icon-button" onClick={() => fileInputRef.current?.click()} aria-label="JSON fájl importálása" title="JSON fájl importálása">
-            📁
-          </button>
-          <input ref={fileInputRef} type="file" accept="application/json,.json,.txt" hidden onChange={handleImportFile} />
+          <div className="action-buttons-group">
+            <button
+              type="button"
+              className="toggle-form-button"
+              onClick={() => {
+                if (draft.id) {
+                  setIsFormOpen((open) => !open)
+                  return
+                }
+                setIsFormOpen((open) => !open)
+                if (!isFormOpen) {
+                  setDraft(emptyDraft)
+                }
+              }}
+              aria-label={isFormOpen ? 'Form bezárása' : 'Szám hozzáadása'}
+              title={isFormOpen ? 'Form bezárása' : 'Szám hozzáadása'}
+            >
+              {draft.id ? '✎' : '+'}
+            </button>
+
+            <button type="button" className="icon-button import-button" onClick={() => setIsImportOpen((open) => !open)} aria-label="Importálandó adatok megnyitása" title="Importálandó adatok megnyitása">
+              ⬇️
+            </button>
+            <button type="button" className="icon-button export-button" onClick={handleExport} aria-label="Exportálás JSON fájlba" title="Exportálás JSON fájlba">
+              ⬆️
+            </button>
+            <button type="button" className="icon-button" onClick={() => fileInputRef.current?.click()} aria-label="JSON fájl importálása" title="JSON fájl importálása">
+              📁
+            </button>
+            <input ref={fileInputRef} type="file" accept="application/json,.json,.txt" hidden onChange={handleImportFile} />
+          </div>
         </div>
+
+        {isFormOpen && (
+          <form className="ticket-form" onSubmit={handleSubmit}>
+            <label>
+              <span>Címke</span>
+              <input
+                type="text"
+                value={draft.label}
+                onChange={(event) => handleDraftChange('label', event.target.value)}
+                placeholder="Pl. autó, gyűjtés, ..."
+              />
+            </label>
+
+            <label>
+              <span>Betétkönyv szám</span>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={draft.number}
+                onChange={(event) => handleDraftChange('number', normalizeNumber(event.target.value))}
+                placeholder="550467611"
+              />
+            </label>
+
+            <div className="actions">
+              <button type="submit" className="secondary-button">
+                {draft.id ? 'Mentés' : 'Szám hozzáadása'}
+              </button>
+              {draft.id && (
+                <button type="button" className="ghost-button" onClick={() => {
+                  setDraft(emptyDraft)
+                  setIsFormOpen(false)
+                }}>
+                  Mégse
+                </button>
+              )}
+            </div>
+          </form>
+        )}
 
         {isImportOpen && (
           <div className="import-box">
