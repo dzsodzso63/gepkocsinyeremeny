@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import './App.css'
 import { downloadTicketsAsJson, parseImportedTickets, type Ticket } from './ticketImportExport'
+import { Analytics } from "@vercel/analytics/react"
 
 const STORAGE_KEY = 'car-sweepstakes-tickets-v1'
 const DEFAULT_TICKETS: Ticket[] = [
@@ -444,6 +445,7 @@ function App() {
           </ul>
         )}
       </section>
+      <Analytics />
     </main>
   )
 }
